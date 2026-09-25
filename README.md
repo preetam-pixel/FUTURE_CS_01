@@ -1,10 +1,11 @@
-# Vulnerability Assessment Report — testphp.vulnweb.com
+# Vulnerability Assessment Report — demo.testfire.net (Altoro Mutual)
 
 Read-only, passive security assessment performed as part of the Future Interns Cyber Security internship task.
 
 ## Website Tested
-- **Target:** http://testphp.vulnweb.com
-- **Owner/Purpose:** Acunetix intentionally-vulnerable demo application, publicly provided for security testing and training. No authorization request was needed as the site explicitly permits this use.
+- **Target:** http://demo.testfire.net
+- **Owner/Purpose:** IBM's "Altoro Mutual" — an intentionally-vulnerable demo banking application, publicly provided for security testing and training. No authorization request was needed as the site explicitly permits this use.
+- **Note:** Testing originally targeted `testphp.vulnweb.com` (Acunetix's demo app), but it was confirmed unreachable from three independent networks during testing (see `findings.md` F-01) and the assessment was switched to this target instead.
 
 ## Scope
 
