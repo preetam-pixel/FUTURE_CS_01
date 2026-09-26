@@ -109,14 +109,22 @@ Template per finding:
 - Remediation: Strip HTML comments from production output (most templating/build pipelines can do this automatically); review current comments for anything sensitive first.
 - Evidence file: evidence/zap/ (also grab a screenshot of the actual comment text once you find it in page source)
 
-## F-09 Exposed REST API documentation (Swagger UI)
+## F-09 Exposed REST API documentation (Swagger UI), including undocumented-auth admin endpoints
 - Category: Information Disclosure / Attack Surface / API Security
-- Risk Level: Medium
-- Where found: `/swagger/index.html`, linked directly from the site footer as "REST API"
-- What we saw: A Swagger/OpenAPI UI is publicly reachable with no authentication, advertised as a normal footer link.
-- Why it matters: Exposed API documentation hands an attacker a complete map of the API surface — every endpoint, its parameters, and expected data shapes — without needing to guess or probe for anything. This falls under OWASP's API Security guidance on excessive/unintended exposure of API inventory.
-- Remediation: Restrict API documentation to internal/authenticated access only (VPN, auth-gated docs portal, or simply excluding it from the public-facing deployment).
-- Evidence file: evidence/screenshots/ (screenshot of the Swagger UI and the endpoint list — note: view only, do not call any listed endpoints)
+- Risk Level: High
+- Where found: `/swagger/index.html` (spec served from `/swagger/properties.json`), linked directly from the site footer as "REST API"
+- What we saw: A full Swagger/OpenAPI UI ("AltoroJ REST API", base path `/api`) is publicly reachable with no authentication. It documents the complete operation surface, grouped by category:
+  - **Login:** `GET /login`, `POST /login`
+  - **Account:** `GET /account`, `GET /account/{accountNo}`, `GET /account/{accountNo}/transactions`, `POST /account/{accountNo}/transactions`
+  - **Transfer:** `POST /transfer` — "Transfer funds between accounts"
+  - **Feedback:** `POST /feedback/submit`, `GET /feedback/{feedbackId}`
+  - **Admin:** `POST /admin/addUser`, `POST /admin/changePassword` — "Add and change user details"
+  - **Logout:** `GET /logout`
+  - Plus request/response model schemas (`login`, `newUser`, `transfer`, `feedback`, `dates`, and more).
+- Why it matters: This goes beyond generic doc exposure — it hands an unauthenticated visitor a complete roadmap of every sensitive operation the app supports, including **administrative user-management endpoints** (`/admin/addUser`, `/admin/changePassword`) and the funds-transfer endpoint, plus the exact data shape each expects. Even without calling them, publicly confirming these admin endpoints exist (and their parameter models) removes nearly all of the reconnaissance work an attacker would otherwise need to do, and specifically highlights account-takeover and unauthorized-admin-action as the highest-value targets. The `{accountNo}` path parameter pattern is also worth noting as a potential IDOR concern (unconfirmed — would need active testing to verify whether account numbers are sequential/guessable and properly access-controlled).
+- **Scope note:** Documentation was viewed only — no endpoint listed above was called.
+- Remediation: Restrict API documentation to internal/authenticated access only (VPN, auth-gated docs portal, or excluding it entirely from the public-facing deployment). Independently of the docs, admin endpoints should always enforce server-side authorization regardless of whether their existence is publicly known.
+- Evidence file: evidence/screenshots/ (Swagger UI screenshot — already captured)
 
 ## F-10 Suspected SSRF risk in "Server Status Check" feature (unconfirmed — observation only)
 - Category: Server-Side Request Forgery (SSRF) / Input Validation
