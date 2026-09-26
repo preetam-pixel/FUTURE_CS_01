@@ -103,7 +103,21 @@ I ended up with **9 findings**: **3 High**, **4 Medium**, **1 Low**, and **1 Inf
 
 ---
 
-## 5. Remediation Roadmap
+## 5. Supporting Evidence
+
+*(In the PDF, this section shows the actual screenshots embedded inline — not just referenced by filename. When rebuilding in Canva, place the real images here, not placeholder boxes.)*
+
+**Target site homepage** — demo.testfire.net, the site tested for this assessment. *(evidence/screenshots/homepage.png)*
+
+**F-02 — HTTPS connection blocked.** Loading the site over HTTPS throws `NET::ERR_CERT_AUTHORITY_INVALID`: the certificate is expired and doesn't chain to a trusted authority. *(evidence/screenshots/https_cert_error.png)*
+
+**F-09 — Swagger UI at /swagger/index.html.** Publicly viewable with no login, listing every endpoint including `POST /admin/addUser` and `POST /admin/changePassword`. *(evidence/screenshots/swagger_ui_endpoints.webp)*
+
+Raw tool output (Nmap scans, HTTP headers, OWASP ZAP passive-scan alerts and crawl history) is documented in full in the accompanying GitHub repository's `evidence/` folder, referenced by finding ID throughout this report.
+
+---
+
+## 6. Remediation Roadmap
 
 **Do first (quick, high-impact):**
 - Renew the SSL certificate (F-02)
@@ -123,7 +137,7 @@ I ended up with **9 findings**: **3 High**, **4 Medium**, **1 Low**, and **1 Inf
 
 ---
 
-## 6. Conclusion
+## 7. Conclusion
 
 None of what I found here needs a rebuild — most of it is configuration changes a dev or ops team could realistically clear in a single sprint. If I had to pick where to start, I'd say the session cookie/certificate pair (F-06/F-02) and the exposed API map (F-09) matter most, since together they weaken the site's core promise of a secure login and remove an attacker's need to guess where the sensitive functionality even lives. I'd prioritize those first, then follow up with a properly scoped test on the status-check feature (F-10) to settle the one thing this passive review could flag but not confirm on its own.
 
