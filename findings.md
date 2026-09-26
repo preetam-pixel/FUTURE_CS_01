@@ -64,6 +64,7 @@ Template per finding:
 - Why it matters: Doesn't grant access by itself, but gives an attacker a head start — they know precisely which platform's known vulnerabilities to research instead of having to guess.
 - Remediation: Suppress/genericize the `Server` header (Tomcat: set the `server` attribute on the Connector in `server.xml`, or strip it at a reverse proxy).
 - Evidence file: evidence/nmap/nmap_scan.txt
+- *Corroborated by OWASP ZAP passive scan: "Server Leaks Version Information via Server HTTP Response Header Field" (Low).*
 
 ## F-05 Missing standard security headers
 - Category: Missing Security Headers / Configuration
@@ -78,6 +79,7 @@ Template per finding:
   - No `Referrer-Policy` → full page URLs can leak to third parties via the Referer header on outbound links.
 - Remediation: Add these headers at the web server/reverse-proxy level — a standard baseline config, not custom code.
 - Evidence file: evidence/headers/curl_headers.txt
+- *Corroborated and detailed by OWASP ZAP passive scan: "Content Security Policy (CSP) Header Not Set" (Medium), "Missing Anti-clickjacking Header" (Medium), "X-Content-Type-Options Header Missing" (Low).*
 
 ## F-06 Session cookie missing Secure and SameSite attributes
 - Category: Session Management / Cookie Security
@@ -87,3 +89,41 @@ Template per finding:
 - Why it matters: Combined with F-02 (HTTPS effectively broken due to the expired cert), this session cookie is realistically transmitted in plaintext for the whole session. Anyone positioned on the same network (public Wi-Fi, compromised router) could capture `JSESSIONID` and hijack the logged-in session outright — on a banking-themed app, that's a direct path to account takeover. Missing `SameSite` also increases CSRF exposure.
 - Remediation: Set `Secure` (requires F-02 fixed first) and `SameSite=Lax`/`Strict` on the session cookie.
 - Evidence file: evidence/headers/curl_headers.txt
+- *Corroborated by OWASP ZAP passive scan: "Cookie without SameSite Attribute" (Low).*
+
+## F-07 Absence of anti-CSRF tokens
+- Category: Session Management / CSRF
+- Risk Level: Medium
+- Where found: OWASP ZAP passive scan — "Absence of Anti-CSRF Tokens" (Medium), flagged across login.jsp, feedback.jsp, subscribe.jsp and other forms
+- What we saw: Forms on the site don't include an anti-CSRF token (a unique, unpredictable value tied to the user's session that proves a request really originated from the site's own form).
+- Why it matters: Combined with F-06 (session cookie missing `SameSite`), there is no CSRF defense layer at all. An attacker could host a page that silently submits one of these forms — in a real banking app, something like a funds transfer — using the victim's active session, with no click or visible interaction needed beyond visiting the attacker's page while logged in.
+- Remediation: Add a unique, server-validated anti-CSRF token to every state-changing form; set `SameSite=Strict`/`Lax` on the session cookie as a second layer (same fix as F-06).
+- Evidence file: evidence/zap/ (ZAP alert detail)
+
+## F-08 Suspicious HTML comments in page source
+- Category: Information Disclosure
+- Risk Level: Low / Informational
+- Where found: OWASP ZAP passive scan — "Information Disclosure - Suspicious Comments" (Informational), flagged on most pages
+- What we saw: ZAP detected HTML comments in the page source worth reviewing; it flags their presence but not the content — needs a manual look (View Page Source / Ctrl+U in browser, search for `<!--`) to see what they actually say.
+- Why it matters: Developer comments left in production output sometimes leak internal file paths, usernames, TODO notes about known issues, or commented-out debug code — small details that add up during attacker reconnaissance.
+- Remediation: Strip HTML comments from production output (most templating/build pipelines can do this automatically); review current comments for anything sensitive first.
+- Evidence file: evidence/zap/ (also grab a screenshot of the actual comment text once you find it in page source)
+
+## F-09 Exposed REST API documentation (Swagger UI)
+- Category: Information Disclosure / Attack Surface / API Security
+- Risk Level: Medium
+- Where found: `/swagger/index.html`, linked directly from the site footer as "REST API"
+- What we saw: A Swagger/OpenAPI UI is publicly reachable with no authentication, advertised as a normal footer link.
+- Why it matters: Exposed API documentation hands an attacker a complete map of the API surface — every endpoint, its parameters, and expected data shapes — without needing to guess or probe for anything. This falls under OWASP's API Security guidance on excessive/unintended exposure of API inventory.
+- Remediation: Restrict API documentation to internal/authenticated access only (VPN, auth-gated docs portal, or simply excluding it from the public-facing deployment).
+- Evidence file: evidence/screenshots/ (screenshot of the Swagger UI and the endpoint list — note: view only, do not call any listed endpoints)
+
+## F-10 Suspected SSRF risk in "Server Status Check" feature (unconfirmed — observation only)
+- Category: Server-Side Request Forgery (SSRF) / Input Validation
+- Risk Level: High (potential) — **not confirmed**; flagged from passive observation of client-side code only
+- Where found: `/status_check.jsp`
+- What we saw: The page's JavaScript takes a `HostName` value (default `'AltoroMutual'`, hardcoded in the form) and passes it as a query parameter to `util/serverStatusCheckService.jsp?HostName=...`, which appears to perform a server-side lookup/connection to that host and return its status. The parameter is attacker-controllable from the client side.
+- Why it matters: If the backend doesn't validate or allow-list the `HostName` value, this is a classic SSRF pattern — the value could potentially be pointed at internal-only services or cloud metadata endpoints the server can reach but the public internet can't, using the server itself as a proxy. SSRF is one of the higher-impact web vulnerability classes when confirmed.
+- **Scope note:** This was intentionally NOT tested. Confirming SSRF requires submitting crafted hostname values and observing server-side behavior — that's active testing/exploitation, outside this engagement's read-only, passive scope. Flagged here as a recommended focus area for a separately scoped, authorized penetration test rather than confirmed ourselves.
+- Remediation (if confirmed): Validate/allow-list acceptable `HostName` values server-side; never let client input directly drive an outbound server-side request; restrict the server's outbound access to internal ranges and cloud metadata IPs by default.
+- Evidence file: evidence/screenshots/status_check_page.png (page + the JS source shown above)

@@ -4,7 +4,7 @@ Read-only, passive security assessment performed as part of the Future Interns C
 
 ## Website Tested
 - **Target:** http://demo.testfire.net
-- **Owner/Purpose:** IBM's "Altoro Mutual" — an intentionally-vulnerable demo banking application, publicly provided for security testing and training. No authorization request was needed as the site explicitly permits this use.
+- **Owner/Purpose:** "Altoro Mutual" (AltoroJ) — an intentionally-vulnerable demo banking application originally by IBM, now maintained by HCL Technologies as part of the AppScan product line. Publicly provided for security testing and training; no authorization request was needed. Confirmed directly by the site's own footer disclaimer: *"This site is not a real banking site... published for the sole purpose of demonstrating the effectiveness of HCL products in detecting web application vulnerabilities."* The app is also open source (github.com/AppSecDev/AltoroJ).
 - **Note:** Testing originally targeted `testphp.vulnweb.com` (Acunetix's demo app), but it was confirmed unreachable from three independent networks during testing (see `findings.md` F-01) and the assessment was switched to this target instead.
 
 ## Scope
