@@ -41,7 +41,7 @@ Read-only, passive security assessment performed as part of the Future Interns C
 ```
 
 ## Report
-Final designed report: `report/vulnerability-assessment-report.pdf` *(added once complete)*
+Final designed report (created in Canva): `report/Task_01_Assement_report.pdf`
 
 ## Disclaimer
 This assessment was conducted for educational purposes against a public target that explicitly permits security testing. No systems were harmed, and no exploitation, brute forcing, or denial-of-service activity was performed.
