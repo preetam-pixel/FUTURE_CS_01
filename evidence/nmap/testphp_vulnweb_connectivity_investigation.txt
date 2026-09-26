@@ -1,0 +1,34 @@
+Original target testphp.vulnweb.com was found unreachable during testing.
+Full analysis in findings.md (F-01). Raw evidence trail below.
+
+=== Scan 1: nmap -sV -sC -Pn testphp.vulnweb.com -oN nmap_scan.txt ===
+Nmap scan report for testphp.vulnweb.com (44.228.249.3)
+Host is up.
+rDNS record for 44.228.249.3: ec2-44-228-249-3.us-west-2.compute.amazonaws.com
+All 1000 scanned ports on testphp.vulnweb.com (44.228.249.3) are in ignored states.
+Not shown: 1000 filtered tcp ports (no-response)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 211.59 seconds
+
+=== Scan 2: sudo nmap -sS -sV -Pn -p 80,443 testphp.vulnweb.com ===
+PORT    STATE    SERVICE VERSION
+80/tcp  filtered http
+443/tcp filtered https
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 7.21 seconds
+
+=== curl -I http://testphp.vulnweb.com ===
+curl: (7) Failed to connect to testphp.vulnweb.com:80 after 21009 ms: Could not connect to server
+
+=== Cross-check from an independent third network (Claude's own browser tool) ===
+Both http:// and https://testphp.vulnweb.com failed to load.
+Control site (example.com) loaded instantly on the same tool, confirming the
+tool's network path itself was fine.
+
+Conclusion: the target site itself was down/unreachable at the time of
+testing — not a Kali VM, ISP, or Nmap-fingerprinting issue. Three independent
+vantage points (Kali Nmap, Kali curl, unrelated third-party browser) all
+failed on this one target while succeeding on everything else. Assessment
+scope was switched to demo.testfire.net as a result (see README.md).

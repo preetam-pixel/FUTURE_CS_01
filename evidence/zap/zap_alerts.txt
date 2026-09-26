@@ -1,0 +1,17 @@
+OWASP ZAP Passive Scan Alerts — demo.testfire.net
+Captured via Manual Explore (passive scan only; no Active Scan was run)
+
+Medium:
+- Absence of Anti-CSRF Tokens
+- Content Security Policy (CSP) Header Not Set
+- Missing Anti-clickjacking Header
+
+Low:
+- Cookie without SameSite Attribute
+- Server Leaks Version Information via "Server" HTTP Response Header Field
+- X-Content-Type-Options Header Missing
+
+Informational:
+- Information Disclosure - Suspicious Comments
+- Modern Web Application
+- Session Management Response Identified

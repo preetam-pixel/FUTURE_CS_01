@@ -26,7 +26,7 @@ Template per finding:
 - What we saw: All 1000 scanned ports reported "filtered (no-response)", including no confirmed open ports. Scan took 211s (slow for a responsive host — suggests retries from dropped packets). Host itself responded as up; rDNS resolves to an AWS EC2 instance (us-west-2).
 - Why it matters: Port 80/443 must actually be open since the site is browsable — so this result is either (a) the security group silently drops raw scan probes while still serving legitimate HTTP traffic, a genuine defensive control worth noting positively, or (b) the scan traffic was rate-limited/dropped somewhere in the path and the result is inconclusive. Follow-up needed before writing this up either way.
 - Remediation: N/A pending confirmation
-- Evidence file: evidence/nmap/nmap_scan.txt (copy your saved output here)
+- Evidence file: evidence/nmap/testphp_vulnweb_connectivity_investigation.txt
 
 **Update 1:** Root `sudo nmap -sS -Pn -p 80,443` also returned both ports filtered — but fast (7.21s vs. 211s), so it's a consistent block, not packet loss noise. Ruled out: naive "just a slow/lossy scan" explanation.
 
@@ -134,4 +134,4 @@ Template per finding:
 - Why it matters: If the backend doesn't validate or allow-list the `HostName` value, this is a classic SSRF pattern — the value could potentially be pointed at internal-only services or cloud metadata endpoints the server can reach but the public internet can't, using the server itself as a proxy. SSRF is one of the higher-impact web vulnerability classes when confirmed.
 - **Scope note:** This was intentionally NOT tested. Confirming SSRF requires submitting crafted hostname values and observing server-side behavior — that's active testing/exploitation, outside this engagement's read-only, passive scope. Flagged here as a recommended focus area for a separately scoped, authorized penetration test rather than confirmed ourselves.
 - Remediation (if confirmed): Validate/allow-list acceptable `HostName` values server-side; never let client input directly drive an outbound server-side request; restrict the server's outbound access to internal ranges and cloud metadata IPs by default.
-- Evidence file: evidence/screenshots/status_check_page.png (page + the JS source shown above)
+- Evidence file: evidence/screenshots/status_check_page_source.txt

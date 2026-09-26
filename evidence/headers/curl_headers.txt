@@ -1,0 +1,8 @@
+Command: curl -I http://demo.testfire.net
+
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Set-Cookie: JSESSIONID=DC9993F50C0B561FF7A96220141B3074; Path=/; HttpOnly
+Content-Type: text/html;charset=ISO-8859-1
+Transfer-Encoding: chunked
+Date: Fri, 25 Sep 2026 15:33:22 GMT

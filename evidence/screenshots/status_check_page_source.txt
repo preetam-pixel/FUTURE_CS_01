@@ -1,0 +1,32 @@
+Source: http://demo.testfire.net/status_check.jsp
+Captured via: curl http://demo.testfire.net/status_check.jsp
+
+Relevant excerpt — client-side JS driving the "Server Status Check" feature.
+Note the HostName parameter passed straight into a server-side lookup call:
+
+<SCRIPT>
+var xmlHttp = false;
+...
+var sLastHostName='';
+function checkSiteStatus(sHostName)
+{
+        sLastHostName = sHostName;
+        //Make JSON request
+        xmlHttp.open("GET","util/serverStatusCheckService.jsp?HostName=" + sHostName);
+        xmlHttp.onreadystatechange = StateChangeForJSON;
+        xmlHttp.send(null);
+}
+...
+</SCRIPT>
+
+<BODY>
+<H1>Server Status Check</H1>
+...
+<FORM action="javascript:checkSiteStatus('AltoroMutual')" id=frmJsonSubmit>
+        <INPUT TYPE=submit value="Check Status">
+</FORM>
+...
+
+Referenced by findings.md F-10 (Suspected SSRF risk — unconfirmed, observation
+only; the HostName parameter was not fuzzed or tested with alternate values,
+as that would constitute active testing outside this engagement's scope).
