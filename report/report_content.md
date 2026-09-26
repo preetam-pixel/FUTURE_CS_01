@@ -71,10 +71,10 @@ I ended up with **9 findings**: **3 High**, **4 Medium**, **1 Low**, and **1 Inf
 **Why it matters:** This exact pattern is one of the more serious classes of web vulnerability when it turns out to be exploitable (it can let an attacker use the target's own server to reach internal systems that aren't supposed to be publicly reachable). I can't say for sure it's exploitable without testing it, and I intentionally didn't.
 **Fix:** I'd recommend this specific feature be the focus of a properly scoped, authorized follow-up penetration test — a passive review like this one can flag the pattern, but can't confirm or rule it out on its own.
 
-### F-02 — SSL certificate expired (Medium)
-**What I found:** The site's security certificate (the thing that makes a browser show a padlock) expired about three months before I ran this assessment.
+### F-02 — SSL certificate expired and untrusted (Medium)
+**What I found:** The site's security certificate (the thing that makes a browser show a padlock) expired about three months before I ran this assessment. Loading the site over HTTPS in a real browser confirms it's worse than just expired — Chrome blocks the connection outright with `NET::ERR_CERT_AUTHORITY_INVALID`, meaning the certificate chain doesn't lead to a trusted authority either.
 **Why it matters:** Visitors get a broken/blocked connection instead of a working secure one. For a banking-styled brand, that's a bad trust signal — and it also trains users to click through security warnings, which is exactly the habit phishing attacks rely on.
-**Fix:** Renew the certificate and set up automatic renewal so it doesn't get forgotten again.
+**Fix:** Replace the certificate with one from a trusted CA and set up automatic renewal so it doesn't get forgotten again.
 
 ### F-03 — Backend application server directly reachable (Medium)
 **What I found:** The application server itself (not just the normal website address) answers directly on an extra network port.

@@ -42,10 +42,10 @@ Template per finding:
 - Category: Transport Security / Configuration
 - Risk Level: Medium
 - Where found: `https://demo.testfire.net:443` (Nmap `ssl-cert` script; confirmed by browser connection failure)
-- What we saw: Port 443 is open and serving TLS (Apache Tomcat/Coyote) with a certificate for CN=demo.testfire.net, valid 2025-05-21 to 2026-06-21 — expired roughly 3 months before testing (2026-09-25). This is why HTTPS connections fail outright in-browser instead of showing a normal warning.
+- What we saw: Port 443 is open and serving TLS (Apache Tomcat/Coyote) with a certificate for CN=demo.testfire.net, valid 2025-05-21 to 2026-06-21 — expired roughly 3 months before testing (2026-09-25). Loading the site over HTTPS in a real browser confirms this: Chrome blocks the connection outright with `NET::ERR_CERT_AUTHORITY_INVALID` ("Your connection is not private") rather than a normal page load. That specific error means the certificate chain doesn't lead to a trusted root CA (on top of being expired) — so the certificate has more than one problem, not just an expiry date that lapsed.
 - Why it matters: On a banking-themed site, a broken padlock is especially damaging to visitor trust, and it trains users to click through/ignore certificate warnings — exactly the habit phishing and MITM attacks exploit. The identity-verification purpose of TLS is defeated even though the underlying encryption algorithm itself is fine.
-- Remediation: Renew the certificate and automate renewal (e.g. Let's Encrypt + certbot cron) so it can't silently lapse again; enforce HTTPS + HSTS once renewed.
-- Evidence file: evidence/nmap/nmap_scan.txt (ssl-cert script output shows the expiry dates)
+- Remediation: Replace the certificate with one from a trusted CA (e.g. Let's Encrypt) and automate renewal (certbot cron) so it can't silently lapse again; enforce HTTPS + HSTS once fixed.
+- Evidence file: evidence/nmap/nmap_scan.txt (expiry dates) and evidence/screenshots/https_cert_error.png (the actual browser error)
 
 ## F-03 Application server directly exposed on port 8080
 - Category: Exposed Service / Attack Surface
